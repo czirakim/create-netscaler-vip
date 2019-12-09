@@ -21,8 +21,7 @@ It is written in Ansible (ansible 2.7.1) The python version used is 2.7.12.
 
 you create a  whole vip like this:
 <br>Step1 : ansible-playbook -i inventory  create_cs.yml  -e "server_state=present service_state=present lb_state=present cs_state=present"  --skip-tags bindservices
-<br>Step2 : ansible-playbook -i inventory  create_cs.yml  -e "server_state=present service_state=present lb_state=present cs_state=present"  --tags bind
-services
+<br>Step2 : ansible-playbook -i inventory  create_cs.yml  -e "server_state=present service_state=present lb_state=present cs_state=present"  --tags bindservices
 
 you can also remove the vip like this:
 <br>Step1 : ansible-playbook -i inventory  create_cs.yml  -e "server_state=present service_state=present lb_state=present cs_state=absent"  --skip-tags bindservices
