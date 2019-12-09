@@ -1,0 +1,129 @@
+---
+- hosts: localVPX
+  gather_facts: no
+  connection: local
+# serial: 1
+
+  vars:
+  - service_name: []
+
+
+  pre_tasks:
+
+  ### create service list
+    - name: create list
+      delegate_to: localhost
+      tags: createlb
+      set_fact:
+          service_name: "{{service_name + [item.value.name] }}"
+      with_dict: '{{server}}'
+
+  ### create yml for service servicebindings
+    - name: yml for service servicebindings
+      delegate_to: localhost
+      tags: createlb
+      template:
+        src: templates/service_bindings.j2
+        dest: svg_service.yml
+        mode: "0644"
+
+
+  tasks:
+### Create server
+    - name: Create a server
+      delegate_to: localhost
+      tags: createserver
+      netscaler_server:
+        nsip: '{{ansible_host}}'
+        nitro_user: '{{ns_user}}'
+        nitro_pass: '{{ns_pass}}'
+        state: '{{server_state}}'
+        name: '{{item.value.name}}'
+        ipaddress: '{{item.value.ip}}'
+        disabled: no
+      with_dict: '{{server}}'
+
+
+### Create Service
+    - name: Create Service
+      delegate_to: localhost
+      tags: createservice
+      netscaler_service:
+        nsip: '{{ansible_host}}'
+        nitro_user: '{{ns_user}}'
+        nitro_pass: '{{ns_pass}}'
+        state: '{{service_state}}'
+        name: 'service_{{item.value.name}}'
+        servername: '{{item.value.name}}'
+        servicetype: HTTP
+        port: 80
+        disabled: no
+        cip: enabled
+        maxclient: 100
+        usip: no
+      with_dict: '{{server}}'
+
+
+    ### Create lb
+    - name: lb vserver
+      delegate_to: localhost
+      tags: createlb
+      netscaler_lb_vserver:
+        nsip: '{{ansible_host}}'
+        nitro_user: '{{ns_user}}'
+        nitro_pass: '{{ns_pass}}'
+        state: '{{lb_state}}'
+        name: 'lb_{{tla_name}}'
+        servicetype: HTTP
+        persistencetype: SOURCEIP
+        lbmethod: ROUNDROBIN
+
+
+### Bind services
+    - name: lb services
+      delegate_to: localhost
+      tags: bindservices
+      import_tasks: "svg_service.yml"
+
+
+
+    - name: cs vserver
+      delegate_to: localhost
+      tags: createcs
+      netscaler_cs_vserver:
+        nsip: '{{ansible_host}}'
+        nitro_user: '{{ns_user}}'
+        nitro_pass: '{{ns_pass}}'
+        state: '{{cs_state}}'
+        name: 'cs-{{tla_port}}-{{tla_name}}'
+        ipv46: '{{ip_address}}'
+        port: '{{tla_port}}'
+        servicetype: '{{tla_service}}'
+        lbvserver: 'lb_{{tla_name}}'
+
+
+### Save Config
+    - name: Save Config
+      delegate_to: localhost
+      netscaler_save_config:
+        nsip: '{{ansible_host}}'
+        nitro_user: '{{ns_user}}'
+        nitro_pass: '{{ns_pass}}'
+      tags: savec
+
+
+
+  post_tasks:
+    - name: Erase file
+      delegate_to: localhost
+      file:
+        path: svg_service.yml
+        state: absent
+      when: lb_state == "absent"
+
+    - name: Create file
+      delegate_to: localhost
+      file:
+        path: svg_service.yml
+        state: touch
+      when: lb_state == "absent"

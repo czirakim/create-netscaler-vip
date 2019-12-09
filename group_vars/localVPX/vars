@@ -1,0 +1,14 @@
+### Define vip variables
+
+tla_name: abc
+ip_address: 192.168.100.71
+tla_port: 80
+tla_service: HTTP
+
+server:
+  tla_server1:
+    name: "{{tla_name}}_1"
+    ip: '192.168.1.71'
+  tla_server2:
+    name: "{{tla_name}}_2"
+    ip: '192.168.1.72'

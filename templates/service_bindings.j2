@@ -1,0 +1,14 @@
+---
+- name: bind_service
+  netscaler_lb_vserver:
+    nsip: {% raw %}"{{ansible_host}}"
+{% endraw %}
+    nitro_user: {% raw %}"{{ns_user}}"
+{% endraw %}
+    nitro_pass: {% raw %}"{{ns_pass}}"
+{% endraw %}
+    name: "lb_{{tla_name}}"
+    servicebindings:
+{% for i in service_name %}
+        - servicename: service_{{i}}
+{% endfor %}
