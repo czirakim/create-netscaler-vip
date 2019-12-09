@@ -8,9 +8,9 @@ This project is for creating a VIP on a Citrix Netscaler ADC.
 <br>In the vars file (group_vars/localVPX/vars) you have to define your tla name and the ip of th vip, the service type of the vip and the port , the server ip's.
 <br>It was written to create content-switched vips but all modules have tags , so you can run any of them if you want only to create a server, service , lb vserver.
 <br>When you run it you also need to specify the state(present/absent) of each part of the vip. Using absent you can remove any part of thw vip. You can also remove the whole vip if you want.
-<br>The process of creating a vip needs 2 steps. So you needs the run the script twice. This is because in the first step using a jinja template a svg file is created  and used in the step2 for binding the services to the lb vserver. 
+<br>The process of creating a vip needs 2 steps. So you need the run the script twice. This is because in the first step using a jinja template a svg file is created  and used in the step2 for binding the services to the lb vserver. 
 <br>So step1 creates everything , but it can not bind the services to the lb vserver. Step2 it binds the services to the lb vserver.
-<br>You can also remove the vip. This is also is a 2 step process as you need to remove the cs vserver first (step1) and then you can remove all the other parts.
+<br>You can also remove the vip. This is also a 2 step process as you need to remove the cs vserver first (step1) and then you can remove all the other parts.
 
 ## Installation
 
